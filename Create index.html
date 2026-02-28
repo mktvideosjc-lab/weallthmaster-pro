@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WealthMaster Pro</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Segoe UI',sans-serif;background:linear-gradient(135deg,#0f172a 0%,#1e293b 50%,#0f172a 100%);color:#f1f5f9;min-height:100vh}
+        .lang{position:fixed;top:20px;right:20px;z-index:1000;display:flex;gap:8px}
+        .lang button{padding:6px 12px;border-radius:20px;border:1px solid rgba(255,255,255,0.2);background:rgba(15,23,42,0.8);color:#94a3b8;cursor:pointer;font-size:12px}
+        .lang button.active{border-color:#f59e0b;color:#f59e0b}
+        .container{display:flex;min-height:100vh}
+        .sidebar{width:260px;background:rgba(255,255,255,0.05);backdrop-filter:blur(20px);border-right:1px solid rgba(255,255,255,0.1);padding:24px;position:fixed;height:100vh}
+        .logo{font-size:24px;font-weight:700;background:linear-gradient(135deg,#f59e0b 0%,#fbbf24 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:32px;display:flex;align-items:center;gap:12px}
+        .logo i{-webkit-text-fill-color:#f59e0b}
+        .nav{display:flex;flex-direction:column;gap:8px}
+        .nav button{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:12px;border:none;background:transparent;color:#94a3b8;cursor:pointer;width:100%;text-align:left;transition:all 0.3s}
+        .nav button:hover{background:rgba(255,255,255,0.05);color:#f1f5f9}
+        .nav button.active{background:linear-gradient(90deg,rgba(245,158,11,0.2) 0%,rgba(245,158,11,0.05) 100%);border-left:3px solid #f59e0b;color:#f1f5f9}
+        .main{margin-left:260px;padding:32px;flex:1}
+        .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;margin-bottom:32px}
+        .stat{background:rgba(255,255,255,0.05);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:24px}
+        .stat-header{display:flex;justify-content:space-between;margin-bottom:16px}
+        .stat-label{font-size:13px;color:#94a3b8}
+        .stat-value{font-size:28px;font-weight:700}
+        .gradient{background:linear-gradient(135deg,#f59e0b 0%,#fbbf24 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px}
+        .emerald{background:rgba(16,185,129,0.2);color:#10b981}
+        .amber{background:rgba(245,158,11,0.2);color:#f59e0b}
+        .rose{background:rgba(244,63,94,0.2);color:#f43f5e}
+        .gold{background:rgba(245,158,11,0.3);color:#f59e0b;animation:pulse 2s infinite}
+        @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(245,158,11,0.4)}50%{box-shadow:0 0 0 10px rgba(245,158,11,0)}}
+        .progress{width:100%;height:6px;background:rgba(255,255,255,0.1);border-radius:3px;overflow:hidden;margin:8px 0}
+        .progress-bar{height:100%;background:#f59e0b;border-radius:3px;transition:width 1s}
+        .tab{display:none}
+        .tab.active{display:block;animation:fadeIn 0.5s}
+        @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+        .grid{display:grid;grid-template-columns:2fr 1fr;gap:24px;margin-bottom:32px}
+        .panel{background:rgba(255,255,255,0.05);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:24px}
+        .milestones{display:grid;grid-template-columns:repeat(8,1fr);gap:12px;margin-top:24px}
+        .milestone{display:flex;flex-direction:column;align-items:center;padding:16px;border-radius:12px;text-align:center}
+        .milestone.locked{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);filter:grayscale(100%);opacity:0.5}
+        .milestone.unlocked{background:rgba(245,158,11,0.2);border:1px solid rgba(245,158,11,0.3)}
+        .milestone i{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:8px;font-size:20px;background:rgba(255,255,255,0.05)}
+        .milestone.unlocked i{background:#f59e0b;color:white}
+        .actions{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+        .action{display:flex;align-items:center;gap:16px;padding:20px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:16px;cursor:pointer;color:#f1f5f9}
+        .action:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(0,0,0,0.2)}
+        .action i{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px}
+        .inc i{background:rgba(16,185,129,0.2);color:#10b981}
+        .exp i{background:rgba(244,63,94,0.2);color:#f43f5e}
+        .inv i{background:rgba(245,158,11,0.2);color:#f59e0b}
+        .modal{position:fixed;inset:0;background:rgba(0,0,0,0.8);display:none;align-items:center;justify-content:center;z-index:1000}
+        .modal.show{display:flex}
+        .modal-content{background:#0f172a;border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:32px;width:90%;max-width:480px}
+        .form-group{margin-bottom:16px}
+        .form-group label{display:block;font-size:13px;color:#94a3b8;margin-bottom:8px}
+        .form-group input,.form-group select{width:100%;padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.05);color:#f1f5f9}
+        .btn{width:100%;padding:16px;background:linear-gradient(135deg,#f59e0b 0%,#ea580c 100%);border:none;border-radius:12px;color:white;font-weight:600;cursor:pointer}
+        .hidden{display:none!important}
+        table{width:100%;border-collapse:collapse}
+        th{text-align:left;padding:12px;font-size:12px;color:#94a3b8;border-bottom:1px solid rgba(255,255,255,0.1)}
+        td{padding:16px 12px;border-bottom:1px solid rgba(255,255,255,0.05);font-size:14px}
+        .badge{padding:4px 12px;border-radius:20px;font-size:11px;background:rgba(255,255,255,0.1)}
+        @media(max-width:1200px){.stats{grid-template-columns:repeat(2,1fr)}.milestones{grid-template-columns:repeat(4,1fr)}.grid{grid-template-columns:1fr}}
+        @media(max-width:768px){.sidebar{display:none}.main{margin-left:0}.stats,.actions{grid-template-columns:1fr}.milestones{grid-template-columns:repeat(2,1fr)}}
+    </style>
+</head>
+<body>
+    <div class="lang">
+        <button onclick="setLang('pt-BR')" class="active" id="l-pt">🇧🇷 PT</button>
+        <button onclick="setLang('en-GB')" id="l-en">🇬🇧 EN</button>
+        <button onclick="setLang('es')" id="l-es">🇪🇸 ES</button>
+    </div>
+
+    <div class="container">
+        <aside class="sidebar">
+            <div class="logo"><i class="fas fa-crown"></i>WealthMaster</div>
+            <nav class="nav">
+                <button onclick="showTab('dash')" class="active" id="t-dash"><i class="fas fa-chart-line"></i> Dashboard</button>
+                <button onclick="showTab('trans')" id="t-trans"><i class="fas fa-exchange-alt"></i> Transações</button>
+                <button onclick="showTab('goals')" id="t-goals"><i class="fas fa-bullseye"></i> Objetivos</button>
+                <button onclick="showTab('inv')" id="t-inv"><i class="fas fa-seedling"></i> Investimentos</button>
+                <button onclick="showTab('edu')" id="t-edu"><i class="fas fa-graduation-cap"></i> Educação</button>
+                <button onclick="showTab('fi')" id="t-fi"><i class="fas fa-flag-checkered"></i> Independência</button>
+            </nav>
+        </aside>
+
+        <main class="main">
+            <div class="stats">
+                <div class="stat">
+                    <div class="stat-header">
+                        <div><div class="stat-label">Patrimônio Total</div><div class="stat-value" id="v-total">R$ 150.000,00</div></div>
+                        <div class="icon emerald"><i class="fas fa-wallet"></i></div>
+                    </div>
+                    <div style="color:#10b981;font-size:13px">+12.5% este mês</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-header">
+                        <div><div class="stat-label">Fundo Emergência</div><div class="stat-value" id="v-emer">R$ 30.000,00</div></div>
+                        <div class="icon amber"><i class="fas fa-shield-alt"></i></div>
+                    </div>
+                    <div class="progress"><div class="progress-bar" style="width:100%"></div></div>
+                    <div style="font-size:12px;color:#94a3b8">6 meses de segurança</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-header">
+                        <div><div class="stat-label">Gastos Mensais</div><div class="stat-value rose" id="v-exp">R$ 5.000,00</div></div>
+                        <div class="icon rose"><i class="fas fa-credit-card"></i></div>
+                    </div>
+                    <div style="color:#f43f5e;font-size:13px">-3.2% vs mês passado</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-header">
+                        <div><div class="stat-label" style="color:#f59e0b">Progresso FI</div><div class="stat-value gradient" id="v-fi">10%</div></div>
+                        <div class="icon gold"><i class="fas fa-crown"></i></div>
+                    </div>
+                    <div style="font-size:13px;color:#94a3b8">Faltam 15 anos para liberdade</div>
+                </div>
+            </div>
+
+            <div id="tab-dash" class="tab active">
+                <div class="grid">
+                    <div class="panel">
+                        <h3 style="margin-bottom:20px">Evolução do Patrimônio</h3>
+                        <canvas id="chart1" height="100"></canvas>
+                    </div>
+                    <div class="panel">
+                        <h3 style="margin-bottom:20px">Controle Diário</h3>
+                        <div style="display:flex;justify-content:space-between;align-items:center;padding:16px;background:rgba(255,255,255,0.03);border-radius:12px;margin-bottom:12px">
+                            <div style="display:flex;align-items:center;gap:12px">
+                                <div class="icon emerald"><i class="fas fa-arrow-down"></i></div>
+                                <div><div style="font-weight:500">Receitas Hoje</div><div style="font-size:12px;color:#94a3b8">28/02/2026</div></div>
+                            </div>
+                            <div style="color:#10b981;font-weight:700">R$ 0,00</div>
+                        </div>
+                        <div style="display:flex;justify-content:space-between;align-items:center;padding:16px;background:rgba(255,255,255,0.03);border-radius:12px;margin-bottom:12px">
+                            <div style="display:flex;align-items:center;gap:12px">
+                                <div class="icon rose"><i class="fas fa-arrow-up"></i></div>
+                                <div><div style="font-weight:500">Despesas Hoje</div><div style="font-size:12px;color:#94a3b8">Limite: R$ 200</div></div>
+                            </div>
+                            <div style="color:#f43f5e;font-weight:700">R$ 0,00</div>
+                        </div>
+                        <div style="padding:16px;background:linear-gradient(135deg,rgba(245,158,11,0.1) 0%,rgba(234,88,12,0.1) 100%);border:1px solid rgba(245,158,11,0.2);border-radius:12px">
+                            <div style="display:flex;align-items:center;gap:8px;color:#f59e0b;margin-bottom:8px"><i class="fas fa-lightbulb"></i><span style="font-weight:500">Dica do Dia</span></div>
+                            <div style="font-size:13px;color:#94a3b8">Regra 50/30/20: 50% necessidades, 30% desejos, 20% investimentos.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
+                        <div><h3 class="gradient">Caminho dos Milhões</h3><div style="font-size:13px;color:#94a3b8">Complete marcos para desbloquear conquistas</div></div>
+                        <div style="font-size:20px">🏆 <span style="color:#f59e0b;font-weight:700">3/8</span></div>
+                    </div>
+                    <div class="milestones">
+                        <div class="milestone unlocked"><i class="fas fa-coins"></i><div style="font-size:11px;font-weight:600">Primeiro Mil</div><div style="font-size:10px;color:#94a3b8">R$ 1.000</div></div>
+                        <div class="milestone unlocked"><i class="fas fa-money-bill-wave"></i><div style="font-size:11px;font-weight:600">10K Club</div><div style="font-size:10px;color:#94a3b8">R$ 10.000</div></div>
+                        <div class="milestone unlocked"><i class="fas fa-piggy-bank"></i><div style="font-size:11px;font-weight:600">Cofrinho</div><div style="font-size:10px;color:#94a3b8">R$ 50.000</div></div>
+                        <div class="milestone locked"><i class="fas fa-gem"></i><div style="font-size:11px">100K</div><div style="font-size:10px;color:#94a3b8">R$ 100.000</div></div>
+                        <div class="milestone locked"><i class="fas fa-crown"></i><div style="font-size:11px">250K</div><div style="font-size:10px;color:#94a3b8">R$ 250.000</div></div>
+                        <div class="milestone locked"><i class="fas fa-star"></i><div style="font-size:11px">500K</div><div style="font-size:10px;color:#94a3b8">R$ 500.000</div></div>
+                        <div class="milestone locked"><i class="fas fa-trophy"></i><div style="font-size:11px">750K</div><div style="font-size:10px;color:#94a3b8">R$ 750.000</div></div>
+                        <div class="milestone locked"><i class="fas fa-gem"></i><div style="font-size:11px">Milionário</div><div style="font-size:10px;color:#94a3b8">R$ 1.000.000</div></div>
+                    </div>
+                </div>
+
+                <div class="actions" style="margin-top:24px">
+                    <div class="action inc" onclick="openModal('income')"><i class="fas fa-plus"></i><div><div style="font-weight:600">Adicionar Receita</div><div style="font-size:12px;color:#94a3b8">Registrar ganho</div></div></div>
+                    <div class="action exp" onclick="openModal('expense')"><i class="fas fa-minus"></i><div><div style="font-weight:600">Adicionar Despesa</div><div style="font-size:12px;color:#94a3b8">Registrar gasto</div></div></div>
+                    <div class="action inv" onclick="showTab('inv')"><i class="fas fa-chart-pie"></i><div><div style="font-weight:600">Investir Agora</div><div style="font-size:12px;color:#94a3b8">Fazer dinheiro trabalhar</div></div></div>
+                </div>
+            </div>
+
+            <div id="tab-trans" class="tab hidden">
+                <div class="panel">
+                    <h3 style="margin-bottom:20px">Transações Recentes</h3>
+                    <table>
+                        <thead><tr><th>Data</th><th>Descrição</th><th>Categoria</th><th>Valor</th><th>Ações</th></tr></thead>
+                        <tbody id="tb-trans"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="tab-goals" class="tab hidden">
+                <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px">
+                    <div class="panel">
+                        <div style="display:flex;justify-content:space-between;margin-bottom:16px">
+                            <div class="icon emerald"><i class="fas fa-shield-alt"></i></div>
+                            <span style="font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;background:rgba(255,255,255,0.05)">50%</span>
+                        </div>
+                        <h4>Fundo de Emergência</h4>
+                        <p style="font-size:13px;color:#94a3b8;margin:8px 0">R$ 15.000 de R$ 30.000</p>
+                        <div class="progress"><div class="progress-bar emerald" style="width:50%"></div></div>
+                    </div>
+                    <div class="panel">
+                        <div style="display:flex;justify-content:space-between;margin-bottom:16px">
+                            <div class="icon" style="background:rgba(59,130,246,0.2);color:#3b82f6"><i class="fas fa-plane"></i></div>
+                            <span style="font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;background:rgba(255,255,255,0.05)">32%</span>
+                        </div>
+                        <h4>Viagem Europa</h4>
+                        <p style="font-size:13px;color:#94a3b8;margin:8px 0">R$ 8.000 de R$ 25.000</p>
+                        <div class="progress"><div class="progress-bar" style="width:32%;background:#3b82f6"></div></div>
+                    </div>
+                    <div class="panel">
+                        <div style="display:flex;justify-content:space-between;margin-bottom:16px">
+                            <div class="icon amber"><i class="fas fa-home"></i></div>
+                            <span style="font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;background:rgba(255,255,255,0.05)">22%</span>
+                        </div>
+                        <h4>Apartamento</h4>
+                        <p style="font-size:13px;color:#94a3b8;margin:8px 0">R$ 45.000 de R$ 200.000</p>
+                        <div class="progress"><div class="progress-bar" style="width:22%"></div></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-inv" class="tab hidden">
+                <div class="grid">
+                    <div class="panel"><h3 style="margin-bottom:20px">Alocação da Carteira</h3><canvas id="chart2" height="200"></canvas></div>
+                    <div class="panel">
+                        <h3 style="margin-bottom:20px">Tipos de Investimentos</h3>
+                        <div style="display:flex;align-items:center;gap:16px;padding:16px;background:rgba(255,255,255,0.03);border-radius:12px;margin-bottom:12px">
+                            <div class="icon emerald"><i class="fas fa-shield-alt"></i></div>
+                            <div style="flex:1"><div style="display:flex;justify-content:space-between"><span>Renda Fixa</span><span style="color:#10b981">40%</span></div><div class="progress"><div class="progress-bar emerald" style="width:40%"></div></div></div>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:16px;padding:16px;background:rgba(255,255,255,0.03);border-radius:12px;margin-bottom:12px">
+                            <div class="icon" style="background:rgba(59,130,246,0.2);color:#3b82f6"><i class="fas fa-chart-line"></i></div>
+                            <div style="flex:1"><div style="display:flex;justify-content:space-between"><span>Ações</span><span style="color:#3b82f6">30%</span></div><div class="progress"><div class="progress-bar" style="width:30%;background:#3b82f6"></div></div></div>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:16px;padding:16px;background:rgba(255,255,255,0.03);border-radius:12px;margin-bottom:12px">
+                            <div class="icon amber"><i class="fas fa-building"></i></div>
+                            <div style="flex:1"><div style="display:flex;justify-content:space-between"><span>FIIs</span><span style="color:#f59e0b">20%</span></div><div class="progress"><div class="progress-bar" style="width:20%"></div></div></div>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:16px;padding:16px;background:rgba(255,255,255,0.03);border-radius:12px">
+                            <div class="icon" style="background:rgba(139,92,246,0.2);color:#8b5cf6"><i class="fas fa-globe"></i></div>
+                            <div style="flex:1"><div style="display:flex;justify-content:space-between"><span>Internacional</span><span style="color:#8b5cf6">10%</span></div><div class="progress"><div class="progress-bar" style="width:10%;background:#8b5cf6"></div></div></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel" style="margin-top:24px;border-color:rgba(245,158,11,0.3)">
+                    <h3 class="gradient">Calculadora de Juros Compostos</h3>
+                    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin:24px 0">
+                        <div class="form-group"><label>Valor Inicial</label><input type="number" id="c1" value="10000"></div>
+                        <div class="form-group"><label>Aporte Mensal</label><input type="number" id="c2" value="1000"></div>
+                        <div class="form-group"><label>Taxa Anual (%)</label><input type="number" id="c3" value="12"></div>
+                        <div class="form-group"><label>Anos</label><input type="number" id="c4" value="20"></div>
+                    </div>
+                    <button class="btn" onclick="calc()">Calcular Projeção</button>
+                    <div id="res" style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:24px;padding-top:24px;border-top:1px solid rgba(255,255,255,0.1);display:none">
+                        <div style="text-align:center"><div style="font-size:13px;color:#94a3b8;margin-bottom:8px">Total Investido</div><div style="font-size:24px;font-weight:700" id="r1">R$ 0</div></div>
+                        <div style="text-align:center"><div style="font-size:13px;color:#94a3b8;margin-bottom:8px">Juros Totais</div><div style="font-size:24px;font-weight:700;color:#10b981" id="r2">R$ 0</div></div>
+                        <div style="text-align:center"><div style="font-size:13px;color:#94a3b8;margin-bottom:8px">Montante Final</div><div style="font-size:24px;font-weight:700;gradient" id="r3">R$ 0</div></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-edu" class="tab hidden">
+                <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px">
+                    <div class="panel" style="background:linear-gradient(135deg,rgba(16,185,129,0.1) 0%,rgba(245,158,11,0.1) 100%)">
+                        <div style="display:flex;justify-content:space-between;margin-bottom:16px"><div class="icon amber"><i class="fas fa-balance-scale"></i></div><span class="badge">Iniciante</span></div>
+                        <h4>Regra 50/30/20</h4>
+                        <p style="font-size:13px;color:#94a3b8;margin-top:8px;line-height:1.6">50% necessidades, 30% desejos, 20% investimentos.</p>
+                    </div>
+                    <div class="panel" style="background:linear-gradient(135deg,rgba(16,185,129,0.1) 0%,rgba(245,158,11,0.1) 100%)">
+                        <div style="display:flex;justify-content:space-between;margin-bottom:16px"><div class="icon amber"><i class="fas fa-shield-alt"></i></div><span class="badge">Essencial</span></div>
+                        <h4>Fundo de Emergência</h4>
+                        <p style="font-size:13px;color:#94a3b8;margin-top:8px;line-height:1.6">Acumule 6-12 meses de despesas em investimentos líquidos.</p>
+                    </div>
+                    <div class="panel" style="background:linear-gradient(135deg,rgba(16,185,129,0.1) 0%,rgba(245,158,11,0.1) 100%)">
+                        <div style="display:flex;justify-content:space-between;margin-bottom:16px"><div class="icon amber"><i class="fas fa-chart-line"></i></div><span class="badge">Intermediário</span></div>
+                        <h4>Juros Compostos</h4>
+                        <p style="font-size:13px;color:#94a3b8;margin-top:8px;line-height:1.6">O oitavo maravilha do mundo. Tempo é seu maior aliado.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-fi" class="tab hidden">
+                <div class="panel" style="text-align:center;padding:48px">
+                    <h2 class="gradient" style="font-size:36px;margin-bottom:16px">Independência Financeira</h2>
+                    <p style="color:#94a3b8;max-width:600px;margin:0 auto 32px">Quando seus investimentos geram renda suficiente para cobrir suas despesas, você alcançou a liberdade financeira.</p>
+                    <div style="position:relative;width:256px;height:256px;margin:0 auto 32px">
+                        <svg style="transform:rotate(-90deg)" width="256" height="256"><circle cx="128" cy="128" r="120" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="8"/><circle cx="128" cy="128" r="120" fill="none" stroke="#f59e0b" stroke-width="8" stroke-linecap="round" stroke-dasharray="753.98" stroke-dashoffset="678.58"/></svg>
+                        <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center"><div style="font-size:48px;font-weight:700">10%</div><div style="font-size:14px;color:#94a3b8">Completo</div></div>
+                    </div>
+                    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px;max-width:600px;margin:0 auto">
+                        <div style="padding:20px;background:rgba(255,255,255,0.03);border-radius:12px"><div style="font-size:13px;color:#94a3b8;margin-bottom:8px">Despesas Mensais</div><div style="font-size:20px;font-weight:700">R$ 5.000</div></div>
+                        <div style="padding:20px;background:rgba(255,255,255,0.03);border-radius:12px"><div style="font-size:13px;color:#94a3b8;margin-bottom:8px">Patrimônio Necessário</div><div style="font-size:20px;font-weight:700;color:#f59e0b">R$ 1.500.000</div></div>
+                        <div style="padding:20px;background:rgba(255,255,255,0.03);border-radius:12px"><div style="font-size:13px;color:#94a3b8;margin-bottom:8px">Patrimônio Atual</div><div style="font-size:20px;font-weight:700;color:#10b981">R$ 150.000</div></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px"><h3 id="mt">Nova Transação</h3><button onclick="closeModal()" style="background:none;border:none;color:#94a3b8;font-size:20px;cursor:pointer"><i class="fas fa-times"></i></button></div>
+            <form onsubmit="saveTrans(event)">
+                <div class="form-group"><label>Descrição</label><input type="text" id="d1" required></div>
+                <div class="form-group"><label>Valor</label><input type="number" id="d2" required step="0.01"></div>
+                <div class="form-group"><label>Categoria</label><select id="d3"><option value="Salário">Salário</option><option value="Alimentação">Alimentação</option><option value="Transporte">Transporte</option><option value="Moradia">Moradia</option><option value="Lazer">Lazer</option></select></div>
+                <div class="form-group"><label>Data</label><input type="date" id="d4" required></div>
+                <button type="submit" class="btn">Salvar</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        let lang='pt-BR',type='income';
+        let trans=JSON.parse(localStorage.getItem('wm_trans'))||[];
+        
+        function setLang(l){
+            lang=l;
+            document.querySelectorAll('.lang button').forEach(b=>b.classList.remove('active'));
+            document.getElementById('l-'+l.split('-')[0]).classList.add('active');
+        }
+        
+        function showTab(t){
+            document.querySelectorAll('.tab').forEach(x=>{x.classList.remove('active');x.classList.add('hidden')});
+            document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active'));
+            document.getElementById('tab-'+t).classList.remove('hidden');
+            document.getElementById('tab-'+t).classList.add('active');
+            document.getElementById('t-'+t).classList.add('active');
+            if(t==='inv')setTimeout(()=>{
+                new Chart(document.getElementById('chart2'),{type:'doughnut',data:{labels:['RF','Ações','FIIs','Int'],datasets:[{data:[40,30,20,10],backgroundColor:['#10b981','#3b82f6','#f59e0b','#8b5cf6'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:'#94a3b8'}}},cutout:'70%'}});
+            },100);
+        }
+        
+        function openModal(t){
+            type=t;
+            document.getElementById('modal').classList.add('show');
+            document.getElementById('mt').textContent=t==='income'?'Nova Receita':'Nova Despesa';
+            document.getElementById('d4').valueAsDate=new Date();
+        }
+        
+        function closeModal(){document.getElementById('modal').classList.remove('show')}
+        
+        function saveTrans(e){
+            e.preventDefault();
+            trans.push({id:Date.now(),type,desc:document.getElementById('d1').value,val:parseFloat(document.getElementById('d2').value),cat:document.getElementById('d3').value,date:document.getElementById('d4').value});
+            localStorage.setItem('wm_trans',JSON.stringify(trans));
+            closeModal();
+            e.target.reset();
+            renderTrans();
+        }
+        
+        function renderTrans(){
+            const tb=document.getElementById('tb-trans');
+            if(!tb)return;
+            tb.innerHTML=trans.slice(-10).reverse().map(t=>`<tr><td>${t.date}</td><td>${t.desc}</td><td><span class="badge">${t.cat}</span></td><td style="color:${t.type==='income'?'#10b981':'#f43f5e'}">${t.type==='income'?'+':'-'} R$ ${t.val.toFixed(2)}</td><td><button onclick="delTrans(${t.id})" style="background:none;border:none;color:#94a3b8;cursor:pointer"><i class="fas fa-trash"></i></button></td></tr>`).join('');
+        }
+        
+        function delTrans(id){trans=trans.filter(t=>t.id!==id);localStorage.setItem('wm_trans',JSON.stringify(trans));renderTrans()}
+        
+        function calc(){
+            const i=parseFloat(document.getElementById('c1').value)||0,m=parseFloat(document.getElementById('c2').value)||0,r=(parseFloat(document.getElementById('c3').value)||0)/100/12,y=(parseFloat(document.getElementById('c4').value)||0)*12;
+            const f=i*Math.pow(1+r,y)+m*((Math.pow(1+r,y)-1)/r),t=i+m*y;
+            document.getElementById('r1').textContent='R$ '+t.toLocaleString();
+            document.getElementById('r2').textContent='R$ '+(f-t).toLocaleString();
+            document.getElementById('r3').textContent='R$ '+f.toLocaleString();
+            document.getElementById('res').style.display='grid';
+        }
+        
+        new Chart(document.getElementById('chart1'),{
+            type:'line',
+            data:{labels:['Ago','Set','Out','Nov','Dez','Jan'],datasets:[{data:[120000,128000,135000,142000,148000,150000],borderColor:'#f59e0b',backgroundColor:'rgba(245,158,11,0.1)',borderWidth:3,fill:true,tension:0.4}]},
+            options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#94a3b8',callback:v=>'R$ '+v.toLocaleString()}},x:{grid:{display:false},ticks:{color:'#94a3b8'}}}}
+        });
+        
+        renderTrans();
+        
+        document.getElementById('modal').addEventListener('click',e=>{if(e.target===document.getElementById('modal'))closeModal()});
+    </script>
+</body>
+</html>
